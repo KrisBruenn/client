@@ -19,10 +19,20 @@ A driver that runs the client postgresql wrapper.
 Contact: klbruenn@gmail.com, or PO Box 2357, Santa Clara, CA, 95055.
 */
 
-
+import "fmt"
 import "klbrun.com/client"
 
-func main() {
+func Disclaimer() {
+    fmt.Println("****************************************************************************")
+    fmt.Println("               Client  Copyright (C) 2023  Kris Bruenn")
+    fmt.Println("****************************************************************************")
+    fmt.Println("This program comes with ABSOLUTELY NO WARRANTY; for details see the GNU GPL.") 
+    fmt.Println("This is free software, and you are welcome to redistribute it under")
+    fmt.Println("certain conditions; see GNU General Public License for details.")
+    fmt.Println("****************************************************************************")
+}
 
+func main() {
+    Disclaimer()
     client.Client()
 }
