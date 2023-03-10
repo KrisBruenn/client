@@ -22,6 +22,7 @@ Contact: klbruenn@gmail.com, or PO Box 2357, Santa Clara, CA, 95055.
 
 import "fmt"
 import "database/sql"
+import "os"
 import _ "github.com/lib/pq"
 
 const host = "localhost"
@@ -38,6 +39,18 @@ func CheckError(err error) {
     if err != nil {
         panic(err)
     }
+}
+
+func AppendFile(fname, astring string) {
+    /* +++++++++++++++++++++
+       + Append astring to +
+       + file fname        +
+       +++++++++++++++++++++ */
+    fn, err := os.OpenFile(fname, os.O_RDWR|os.O_APPEND, 0600)
+    CheckError(err)
+
+    _, err = fn.WriteString(astring)
+    CheckError(err)
 }
 
 func DB_Menu(name string) {
@@ -84,6 +97,8 @@ func Create_DB(newdbname string) {
     /* +++++++++++++++++++++++++++++++
        + Connect to postgres DB to   +
        + create a new database.      +
+       + Also, create a SQL file to  +
+       + do the same.                +
        +++++++++++++++++++++++++++++++ */
 
     psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, "postgres")
@@ -93,8 +108,16 @@ func Create_DB(newdbname string) {
 
     defer db.Close()
 
-    _, err = db.Exec("create database " + newdbname)
+    cstring := "create database " + newdbname
+    _, err = db.Exec(cstring)
     CheckError(err)
+
+    fname := newdbname+".sql"
+    cbytes := []byte(cstring)
+    err = os.WriteFile(fname, cbytes, 0600)
+    CheckError(err)
+
+    AppendFile(fname, "\n")
 
     fmt.Println("\nSuccess!\n")
 }
