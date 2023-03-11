@@ -31,6 +31,7 @@ const port = 5432
 var user = "postgres"
 var password = "Doum1bek"
 var dbname = "postgres"
+var fname = ""
 
 func CheckError(err error) {
     /* +++++++++++++++++++++
@@ -143,8 +144,8 @@ func Drop_DB(olddbname string) {
 
 func ListDBs(quiet bool) []string {
     /* +++++++++++++++++++++++++++++++
-       + Query postgres database for +
-       + the list of databases       +
+       + Query the postgres database +
+       + for the list of databases.  +
        +++++++++++++++++++++++++++++++ */
 
     var name string
@@ -180,6 +181,60 @@ func ListDBs(quiet bool) []string {
     return dbs
 }
 
+func CreateTable(tname string) {
+    var cstring = "CREATE TABLE "+tname+" ("
+    /* add column names and types */
+    var col_name, col_type string
+    var first = true
+    fmt.Println("Type 'exit()' to stop adding columns.")
+    for {
+        fmt.Print("Enter column name: ")
+        fmt.Scanln(&col_name)
+        if col_name == "exit()" {
+            break
+        } 
+        fmt.Print("Enter column type: ")
+        fmt.Scanln(&col_type)
+        if ! first {
+            cstring += ", "
+        } else {
+            first = false
+        }
+        cstring += col_name+" "+col_type
+    }
+    cstring += ");"
+
+    psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+
+    db, err := sql.Open("postgres", psqlconn)
+    CheckError(err)
+
+    defer db.Close()
+
+    _, err = db.Exec(cstring)
+    CheckError(err)
+
+    fmt.Println("fname is ", fname)
+    AppendFile(fname, cstring)
+
+    fmt.Println("\nSuccess!\n")
+}
+
+func DropTable(tname string) {
+
+    psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+
+    db, err := sql.Open("postgres", psqlconn)
+    CheckError(err)
+
+    defer db.Close()
+
+    _, err = db.Exec("DROP TABLE " + tname)
+    CheckError(err)
+
+    fmt.Println("\nSuccess!\n")
+}
+
 func ListTables() {
     /* +++++++++++++++++++++++++++++++
        + Query the selected DB for   +
@@ -210,6 +265,11 @@ func ListTables() {
 }
 
 func DescribeTable(tname string) {
+    /* +++++++++++++++++++++++++++++++
+       + Query the current DB for    +
+       + the list of columns in the  +
+       + given table 'tname'.        +
+       +++++++++++++++++++++++++++++++ */
 
     var name string
     psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
@@ -249,6 +309,16 @@ func subClient() {
         switch entry {
             case "x":
                 break subLoop
+            case "1":
+                var tname string
+                fmt.Print("Enter tablename: ")
+                fmt.Scanln(&tname)
+                CreateTable(tname)
+            case "2":
+                var tname string
+                fmt.Print("Enter tablename: ")
+                fmt.Scanln(&tname)
+                DropTable(tname)
             case "3":
                 ListTables()
             case "4":
@@ -296,6 +366,7 @@ func Client() {
                 for _, v := range names {
                     if v == DB_name {
                         dbname = DB_name
+                        fname = dbname+".sql"
                         break
                     } 
                 }
