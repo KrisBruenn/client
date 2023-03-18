@@ -181,6 +181,65 @@ func ListDBs(quiet bool) []string {
     return dbs
 }
 
+/* General Purpose Column Types
+    binary string
+        bytea
+    bit string (mask)
+        fixed length BIT(n)
+        max length BIT VARYING(n)
+    boolean AKA bool
+    character
+        fixed length CHAR(n)
+        max length VARCHAR(n)
+        unlimited TEXT
+    numeric AKA decimal
+        2 bytes SMALLINT
+        4 bytes INT
+        8 bytes BIGINT AKA int8
+        auto-increment SERIAL AKA serial4
+        auto-increment bigserial AKA serial8
+        8 bytes float(n)
+        4 bytes real or float8
+        exact numeric(p,s)
+        8 bytes money
+    temporal
+        DATE
+        TIME
+        TIMESTAMP
+        TIMESTAMPTZ
+        INTERVAL
+    multidimensional array
+        <type>[]...
+    JSON
+        JSON data
+        binary JSONB data
+    range type (needs subrange type)
+        int4range
+        int8range
+        numrange
+        tsrange
+        tstzrange
+        daterange
+    UUID
+    XML 
+       xml data
+    geometric types
+        box
+        circle
+        line
+        line segment lseg
+        closed or open path
+        point
+        polygon
+    network address
+        cidr (IPv4, IPv6)
+        inet (IPv4)
+        6 byte macaddr
+        8 byte macaddr8
+    text search
+        tsvector
+        tsquery
+*/
 func CreateTable(tname string) {
     var cstring = "CREATE TABLE "+tname+" ("
     /* add column names and types */
