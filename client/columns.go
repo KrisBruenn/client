@@ -31,7 +31,7 @@ func CharMenu() {
     fmt.Println("*******************")
 }
 
-func numMenu() {
+func NumMenu() {
 
     fmt.Println("*******************")
     fmt.Println("* 1) Integer      *")
@@ -61,20 +61,21 @@ func GetColType() (string, error) {
             fmt.Scanln(&cInput)
             cEntry = cInput[:1]
             switch cEntry {
-                case 1:
+                case "1":
                     fmt.Print("Enter size: ")
                     fmt.Scanln(&cSize)
                     cResult = fmt.Sprintf("CHAR(%s)", cSize)
                     return cResult, nil
-                case 2:
+                case "2":
                     fmt.Print("Enter size: ")
                     fmt.Scanln(&cSize)
                     cResult = fmt.Sprintf("VARCHAR(%s)", cSize)
                     return cResult, nil
-                case 3:
+                case "3":
                     return "TEXT", nil
                 case "x":
                     return "", errors.New("Must specify character type!")
+            }
         case "3":
             var nEntry, nInput, nResult, nSize string
             NumMenu()
@@ -83,7 +84,7 @@ func GetColType() (string, error) {
             nEntry = nInput[:1]
             switch nEntry {
 
-                case 1:
+                case "1":
                     fmt.Print("Enter size [2, 4, 8]: ")
                     fmt.Scanln(&nSize)
                     switch nSize[:1] {
@@ -96,7 +97,7 @@ func GetColType() (string, error) {
                         default:
                             return "", errors.New("Invalid integer size!")
                     }
-                case 2:
+                case "2":
                     var precision, scale string
                     fmt.Print("Enter precision: ")
                     fmt.Scanln(&nSize)
@@ -106,7 +107,7 @@ func GetColType() (string, error) {
                     scale = nSize
                     nResult = fmt.Sprintf("NUMERIC(%s, %s)", precision, scale)
                     return nResult, nil
-                case 3:
+                case "3":
                     fmt.Print("Enter size [4, 8]: ")
                     fmt.Scanln(&nSize)
                     switch nSize[:1] {
@@ -116,7 +117,8 @@ func GetColType() (string, error) {
                             return "DOUBLE PRECISION", nil
                         default:
                             return "", errors.New("Invalid real size!")
-                case 4:
+                    }
+                case "4":
                     fmt.Print("Enter size [2, 4, 8]: ")
                     fmt.Scanln(&nSize)
                     switch nSize[:1] {
@@ -132,7 +134,11 @@ func GetColType() (string, error) {
                 case "x":
                     return "", errors.New("Must specify numeric type!")
             }
-            
+
         case "4":
+	    return "", errors.New("Must specify temporal type!")
+	default:
+	    return "", errors.New("Invalid column type selected!")
     }
+    return "", errors.New("Should not get here!")
 }

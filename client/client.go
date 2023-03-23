@@ -244,6 +244,7 @@ func CreateTable(tname string) {
     var cstring = "CREATE TABLE "+tname+" ("
     /* add column names and types */
     var col_name, col_type string
+    var err error
     var first = true
     fmt.Println("Type 'exit()' to stop adding columns.")
     for {
@@ -252,8 +253,8 @@ func CreateTable(tname string) {
         if col_name == "exit()" {
             break
         } 
-        fmt.Print("Enter column type: ")
-        fmt.Scanln(&col_type)
+        col_type, err = GetColType()
+	CheckError(err)
         if ! first {
             cstring += ", "
         } else {
@@ -261,7 +262,7 @@ func CreateTable(tname string) {
         }
         cstring += col_name+" "+col_type
     }
-    cstring += ");"
+    cstring += ");\n"
 
     psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 
