@@ -43,6 +43,18 @@ func NumMenu() {
     fmt.Println("*******************")
 }
 
+func TempMenu() {
+
+    fmt.Println("*******************")
+    fmt.Println("* 1) Date         *")
+    fmt.Println("* 2) Time         *")
+    fmt.Println("* 3) Time w/ zone *")
+    fmt.Println("* 4) Time span    *")
+    fmt.Println("*                 *")
+    fmt.Println("* x) Exit         *")
+    fmt.Println("*******************")
+}
+
 func GetColType() (string, error) {
     var entry, input string
     TypeMenu()
@@ -136,7 +148,26 @@ func GetColType() (string, error) {
             }
 
         case "4":
-	    return "", errors.New("Must specify temporal type!")
+            var tEntry, tInput string
+	    TempMenu()
+            fmt.Print("Enter temporal type: ")
+            fmt.Scanln(&tInput)
+            tEntry = tInput[:1]
+            switch tEntry {
+
+                case "1":
+		    return "DATE NOT NULL", nil
+                case "2":
+		    return "TIME", nil
+                case "3":
+		    return "TIMETZ", nil
+                case "4":
+		    return "INTERVAL", nil
+                case "x":
+                    return "", errors.New("Must specify temporal type!")
+		default:
+		    return "", errors.New("Invalid temporal type!")
+	    }
 	default:
 	    return "", errors.New("Invalid column type selected!")
     }
