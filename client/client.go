@@ -109,7 +109,7 @@ func Create_DB(newdbname string) {
 
     defer db.Close()
 
-    cstring := "create database " + newdbname
+    cstring := "CREATE DATABASE " + newdbname + ";"
     _, err = db.Exec(cstring)
     CheckError(err)
 
@@ -243,9 +243,11 @@ func ListDBs(quiet bool) []string {
 func CreateTable(tname string) {
     var cstring = "CREATE TABLE "+tname+" ("
     /* add column names and types */
-    var col_name, col_type string
+    var col_name, col_type, constraint, pkey string
     var err error
     var first = true
+    var primary = false
+
     fmt.Println("Type 'exit()' to stop adding columns.")
     for {
         fmt.Print("Enter column name: ")
@@ -255,14 +257,31 @@ func CreateTable(tname string) {
         } 
         col_type, err = GetColType()
 	CheckError(err)
+
+	if ! primary {
+	    fmt.Print("Primary key? [y/n]: ")
+	    fmt.Scanln(&pkey)
+	    if pkey[:1] == "y" {
+		constraint = " PRIMARY KEY"
+		primary = true
+	    } 
+        
+        } else {
+		fmt.Println("XXX")
+		constraint = ""
+	        constraint, err = GetConstraint()
+	        CheckError(err)
+	}
+
         if ! first {
             cstring += ", "
         } else {
             first = false
         }
-        cstring += col_name+" "+col_type
+        cstring += col_name+" "+ col_type+constraint
     }
-    cstring += ");\n"
+    cstring += ");"
+    fmt.Println(cstring)
 
     psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 
@@ -274,8 +293,8 @@ func CreateTable(tname string) {
     _, err = db.Exec(cstring)
     CheckError(err)
 
-    fmt.Println("fname is ", fname)
     AppendFile(fname, cstring)
+    AppendFile(fname, "\n")
 
     fmt.Println("\nSuccess!\n")
 }

@@ -55,6 +55,14 @@ func TempMenu() {
     fmt.Println("*******************")
 }
 
+func ConstraintMenu() {
+
+    fmt.Println("*******************")
+    fmt.Println("*                 *")
+    fmt.Println("* x) Exit         *")
+    fmt.Println("*******************")
+}
+
 func GetColType() (string, error) {
     var entry, input string
     TypeMenu()
@@ -172,4 +180,27 @@ func GetColType() (string, error) {
 	    return "", errors.New("Invalid column type selected!")
     }
     return "", errors.New("Should not get here!")
+}
+
+func GetConstraint() (string, error) {
+    var entry, input string
+
+    fmt.Print("Do you want to add a constraint? [y/n]: ")
+    fmt.Scanln(&input)
+    entry = input[:1]
+    if entry == "n" {
+        return "", nil
+    }
+
+    ConstraintMenu()
+    fmt.Print("Enter constraint: ")
+    fmt.Scanln(&input)
+    entry = input[:1]
+    switch entry {
+
+        case "x":
+            return "", errors.New("Must specify a constraint!")
+	default:
+	    return "", errors.New("Invalid constraint response!")
+    }
 }
