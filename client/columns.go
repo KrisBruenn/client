@@ -58,6 +58,10 @@ func TempMenu() {
 func ConstraintMenu() {
 
     fmt.Println("*******************")
+    fmt.Println("* 1) Not Null     *")
+    fmt.Println("* 2) Unique       *")
+    fmt.Println("* 3) Foreign Key  *")
+    fmt.Println("* 4) Check exp    *")
     fmt.Println("*                 *")
     fmt.Println("* x) Exit         *")
     fmt.Println("*******************")
@@ -183,7 +187,7 @@ func GetColType() (string, error) {
 }
 
 func GetConstraint() (string, error) {
-    var entry, input string
+    var cResult, entry, input string
 
     fmt.Print("Do you want to add a constraint? [y/n]: ")
     fmt.Scanln(&input)
@@ -198,6 +202,20 @@ func GetConstraint() (string, error) {
     entry = input[:1]
     switch entry {
 
+        case "1":
+	    return "NOT NULL", nil
+        case "2":
+	    return "UNIQUE", nil
+        case "3":
+	    fmt.Print("Enter referenced table: ")
+	    fmt.Scanln(&input)
+	    cResult = fmt.Sprintf("REFERENCES %s", input)
+	    return cResult, nil
+        case "4":
+	    fmt.Print("Enter boolean expression: ")
+	    fmt.Scanln(&input)
+	    cResult = fmt.Sprintf("CHECK %s", input)
+	    return cResult, nil
         case "x":
             return "", errors.New("Must specify a constraint!")
 	default:

@@ -79,7 +79,6 @@ func Menu() {
 
     fmt.Println("+++++++++++++++++++++")
     fmt.Println("Database: "+dbname)
-    //fmt.Println("+   DB client       +")
     fmt.Println("+++++++++++++++++++++")
     fmt.Println("+                   +")
     fmt.Println("+ 1: create DB      +")
@@ -267,9 +266,9 @@ func CreateTable(tname string) {
 	    } 
         
         } else {
-		fmt.Println("XXX")
 		constraint = ""
 	        constraint, err = GetConstraint()
+		fmt.Println(constraint)
 	        CheckError(err)
 	}
 
@@ -278,7 +277,7 @@ func CreateTable(tname string) {
         } else {
             first = false
         }
-        cstring += col_name+" "+ col_type+constraint
+        cstring += col_name+" "+ col_type+" "+constraint
     }
     cstring += ");"
     fmt.Println(cstring)
