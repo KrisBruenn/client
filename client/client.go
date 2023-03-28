@@ -22,6 +22,7 @@ Contact: klbruenn@gmail.com, or PO Box 2357, Santa Clara, CA, 95055.
 
 import "fmt"
 import "database/sql"
+import "errors"
 import "os"
 import _ "github.com/lib/pq"
 
@@ -54,6 +55,23 @@ func AppendFile(fname, astring string) {
     CheckError(err)
 }
 
+func AlterTableMenu(tname string) {
+
+    fmt.Println("+++++++++++++++++++++")
+    fmt.Println("Table: "+tname)
+    fmt.Println("+++++++++++++++++++++")
+    fmt.Println("+                   +")
+    fmt.Println("+ 1: add column     +")
+    fmt.Println("+ 2: drop column    +")
+    fmt.Println("+ 3: list columns   +")
+    fmt.Println("+                   +")
+    fmt.Println("+ x: ret to DB Menu +")
+    fmt.Println("+                   +")
+    fmt.Println("+++++++++++++++++++++")
+
+    fmt.Print("Enter choice: ")
+}
+
 func DB_Menu(name string) {
 
     fmt.Println("+++++++++++++++++++++")
@@ -64,6 +82,7 @@ func DB_Menu(name string) {
     fmt.Println("+ 2: drop table     +")
     fmt.Println("+ 3: list tables    +")
     fmt.Println("+ 4: describe table +")
+    fmt.Println("+ 5: alter table    +")
     fmt.Println("+                   +")
     fmt.Println("+ x: ret to client  +")
     fmt.Println("+                   +")
@@ -93,7 +112,7 @@ func Menu() {
     fmt.Print("Enter choice: ")
 }
 
-func Create_DB(newdbname string) {
+func Create_DB(newdbname string) (bool, error) {
     /* +++++++++++++++++++++++++++++++
        + Connect to postgres DB to   +
        + create a new database.      +
@@ -119,10 +138,10 @@ func Create_DB(newdbname string) {
 
     AppendFile(fname, "\n")
 
-    fmt.Println("\nSuccess!\n")
+    return true, nil
 }
 
-func Drop_DB(olddbname string) {
+func Drop_DB(olddbname string) (bool, error) {
     /* +++++++++++++++++++++++++++++++
        + Connect to postgres DB to   +
        + drop an existing database.  +
@@ -137,8 +156,7 @@ func Drop_DB(olddbname string) {
 
     _, err = db.Exec("drop database " + olddbname)
     CheckError(err)
-
-    fmt.Println("\nSuccess!\n")
+    return true, nil
 }
 
 func ListDBs(quiet bool) []string {
@@ -239,7 +257,7 @@ func ListDBs(quiet bool) []string {
         tsvector
         tsquery
 */
-func CreateTable(tname string) {
+func CreateTable(tname string) (bool, error) {
     var cstring = "CREATE TABLE "+tname+" ("
     /* add column names and types */
     var col_name, col_type, constraint, pkey string
@@ -280,7 +298,6 @@ func CreateTable(tname string) {
         cstring += col_name+" "+ col_type+" "+constraint
     }
     cstring += ");"
-    fmt.Println(cstring)
 
     psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 
@@ -294,11 +311,10 @@ func CreateTable(tname string) {
 
     AppendFile(fname, cstring)
     AppendFile(fname, "\n")
-
-    fmt.Println("\nSuccess!\n")
+    return true, nil
 }
 
-func DropTable(tname string) {
+func DropTable(tname string) (bool, error) {
 
     psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 
@@ -310,7 +326,7 @@ func DropTable(tname string) {
     _, err = db.Exec("DROP TABLE " + tname)
     CheckError(err)
 
-    fmt.Println("\nSuccess!\n")
+    return true, nil
 }
 
 func ListTables() {
@@ -373,6 +389,25 @@ func DescribeTable(tname string) {
     fmt.Println(" ")
 }
 
+func AlterTable(tname string) (bool, error) {
+    var result bool = false
+    for {
+        var input string
+        AlterTableMenu(tname)
+        fmt.Scanln(&input)
+        var entry = input[:1]
+        switch entry {
+	    case "3":
+	        DescribeTable(tname)
+	        result = true
+            case "x":
+	        return result, nil
+            default:
+	        return false, errors.New("Invalid choice to alter table!")
+        }
+    }
+}
+
 func subClient() {
     /* +++++++++++++++++++++++++++++++
        + Examine a given DB.  Add or +
@@ -391,12 +426,20 @@ func subClient() {
                 var tname string
                 fmt.Print("Enter tablename: ")
                 fmt.Scanln(&tname)
-                CreateTable(tname)
+		result, err := CreateTable(tname) 
+                CheckError(err)
+		if result {
+		    fmt.Println("Success!")
+		}
             case "2":
                 var tname string
                 fmt.Print("Enter tablename: ")
                 fmt.Scanln(&tname)
-                DropTable(tname)
+		result, err := DropTable(tname) 
+                CheckError(err)
+		if result {
+		    fmt.Println("Success!")
+		}
             case "3":
                 ListTables()
             case "4":
@@ -404,6 +447,15 @@ func subClient() {
                 fmt.Print("Enter tablename: ")
                 fmt.Scanln(&tname)
                 DescribeTable(tname)
+            case "5":
+                var tname string
+                fmt.Print("Enter tablename: ")
+                fmt.Scanln(&tname)
+		result, err := AlterTable(tname) 
+                CheckError(err)
+		if result {
+		    fmt.Println("Success!")
+		}
             default:
                 fmt.Println("\nInvalid entry! Try again...\n")
         }
@@ -430,11 +482,13 @@ func Client() {
             case "1":
                 fmt.Print("Enter DB name: ")
                 fmt.Scanln(&DB_name)
-                Create_DB(DB_name)
+		_, err := Create_DB(DB_name)
+                CheckError(err)
             case "2":
                 fmt.Print("Enter DB name: ")
                 fmt.Scanln(&DB_name)
-                Drop_DB(DB_name)
+		_, err := Drop_DB(DB_name)
+                CheckError(err)
             case "3":
                 _ = ListDBs(false)
             case "4":
