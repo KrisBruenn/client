@@ -168,7 +168,7 @@ func GetColType() (string, error) {
             switch tEntry {
 
                 case "1":
-		    return "DATE NOT NULL", nil
+		    return "DATE", nil
                 case "2":
 		    return "TIME", nil
                 case "3":

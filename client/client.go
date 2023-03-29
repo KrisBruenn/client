@@ -286,7 +286,7 @@ func CreateTable(tname string) (bool, error) {
         } else {
 		constraint = ""
 	        constraint, err = GetConstraint()
-		fmt.Println(constraint)
+		//fmt.Println(constraint)
 	        CheckError(err)
 	}
 
@@ -389,17 +389,62 @@ func DescribeTable(tname string) {
     fmt.Println(" ")
 }
 
+func AddColumn(tname, cname, dtype, constraint string) (bool, error) {
+
+    psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+
+    db, err := sql.Open("postgres", psqlconn)
+    CheckError(err)
+
+    defer db.Close()
+
+    _, err = db.Exec("ALTER TABLE " + tname + " ADD COLUMN " + cname + " " + dtype + " " + constraint + ";")
+    CheckError(err)
+
+    return true, nil
+}
+
+func DropColumn(tname, cname string) (bool, error) {
+
+    psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+
+    db, err := sql.Open("postgres", psqlconn)
+    CheckError(err)
+
+    defer db.Close()
+
+    _, err = db.Exec("ALTER TABLE " + tname + " DROP COLUMN " + cname)
+    CheckError(err)
+
+    return true, nil
+}
+
 func AlterTable(tname string) (bool, error) {
     var result bool = false
+    var err error = nil
     for {
-        var input string
+        var input, cname string
         AlterTableMenu(tname)
         fmt.Scanln(&input)
         var entry = input[:1]
         switch entry {
+	    case "1":
+		var dtype, constraint string
+		fmt.Print("Enter new column name: ")
+		fmt.Scanln(&cname)
+		dtype, err = GetColType()
+		constraint, err = GetConstraint()
+		result, err = AddColumn(tname, cname, dtype, constraint)
+		return result, err
+	    case "2":
+		fmt.Print("Enter column name: ")
+                fmt.Scanln(&cname)
+		result, err = DropColumn(tname, cname)
+		return result, err
 	    case "3":
 	        DescribeTable(tname)
 	        result = true
+		return result, nil
             case "x":
 	        return result, nil
             default:
@@ -484,11 +529,13 @@ func Client() {
                 fmt.Scanln(&DB_name)
 		_, err := Create_DB(DB_name)
                 CheckError(err)
+		fmt.Println("Success!")
             case "2":
                 fmt.Print("Enter DB name: ")
                 fmt.Scanln(&DB_name)
 		_, err := Drop_DB(DB_name)
                 CheckError(err)
+		fmt.Println("Success!")
             case "3":
                 _ = ListDBs(false)
             case "4":
